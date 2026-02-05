@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: spring-boot-api-demo
-    env: java
-    plan: free
-    buildCommand: ./mvnw clean package -DskipTests
-    startCommand: java -jar target/*.jar
