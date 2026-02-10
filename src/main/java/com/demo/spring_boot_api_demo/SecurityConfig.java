@@ -2,14 +2,20 @@ package com.demo.spring_boot_api_demo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -18,11 +24,12 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .logout(logout -> logout.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/health", "/time", "/echo", "/error").permitAll()
-                .requestMatchers("/protected").authenticated()
+                .requestMatchers("/", "/health", "/token", "/demo", "/error").permitAll()
+                .requestMatchers("/resource1").hasRole("USER")
+                .requestMatchers("/resource2").hasRole("ADMIN")
                 .anyRequest().denyAll()
             )
-            .httpBasic(Customizer.withDefaults());
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
